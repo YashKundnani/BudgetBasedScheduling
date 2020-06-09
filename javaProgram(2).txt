@@ -72,10 +72,8 @@ class Schedule_Task_Class
     TaskDetails[] DeadlineScheduledTask(TaskDetails[] ScheduledTask)
     {
         TaskDetails[] DeadlineScheduledTaskArray=new TaskDetails[totaltaskScheduled];
-        System.out.println("Value OF total TASK Scheduled: "+totaltaskScheduled);
         totaltaskScheduled=0;
-        System.out.println("Value OF total TASK Scheduled: "+totaltaskScheduled);
-
+        
         int ele_count=0;
         for(int i=0;i<DeadlineScheduledTaskArray.length;i++) {
             int key = ScheduledTask[i].deadline;
@@ -109,7 +107,6 @@ class Schedule_Task_Class
             }
 
             totaltaskScheduled=ele_count;
-            System.out.println("Value OF total TASK Scheduled: "+totaltaskScheduled);
 
 
 
@@ -250,7 +247,7 @@ public class Main
         double budget=sc.nextDouble();
         
 	/*
-
+	Test FILE
         //Rate and Task for testing purpose.
         Rate r= new Rate(2.13,1.73);
         int task_count=4;

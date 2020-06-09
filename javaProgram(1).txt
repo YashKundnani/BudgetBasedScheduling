@@ -1,0 +1,250 @@
+package sample;
+import java.util.Scanner;
+class task_details{
+
+    int task_id;
+    int CPU_use;
+    int memory_use;
+    int deadline;
+    int CPU_cost;
+    int memory_cost;
+
+    void task_details(int a,int b,int id)
+    {
+        CPU_use=a;
+        memory_use=b;
+        task_id=id;
+
+    }
+}
+class InsertionSort {
+    void sort(task_details[] task, int[] total_cost_per_task, int number_of_task)
+    {
+        for(int i=0;i<number_of_task;i++)
+        {
+            int key1 = total_cost_per_task[i];
+            task_details key2= task[i];
+            int j = i - 1;
+            while (j >= 0 && total_cost_per_task[j] > key1) {
+                total_cost_per_task[j + 1] = total_cost_per_task[j];
+                task[j+1]=task[j];
+                j = j - 1;
+            }
+            total_cost_per_task[j + 1] = key1;
+            task[j + 1] = key2;
+        }
+        System.out.println();
+        for(int i=0;i<number_of_task;i++)
+            System.out.print("-----------------");
+        System.out.println();
+        System.out.print("TASK ID: ");
+        for(int i=0;i<number_of_task;i++)
+            System.out.print("|\t\t"+task[i].task_id+"\t\t|");
+        System.out.println();
+
+        for(int i=0;i<number_of_task;i++)
+            System.out.print("-----------------");
+        System.out.println();
+        System.out.print("COST:");
+        for(int i=0;i<number_of_task;i++)
+            System.out.print("|\t\t"+total_cost_per_task[i]+"\t\t|");
+        System.out.println();
+
+        for(int i=0;i<number_of_task;i++)
+            System.out.print("-----------------");
+        System.out.println();
+    }
+    task_details[] sortWithinBudget(task_details[] task, int[] total_cost_per_task,int number_of_task,int budget)
+    {
+        int cost=0;
+        task_details[] taskWithinBudget= new task_details[number_of_task];
+        for(int i=0;i<number_of_task;i++)
+        {
+            cost=cost+total_cost_per_task[i];
+            if(cost>budget) {
+
+                System.out.println("Customer Budget : " + budget);
+                System.out.println("Maximum Task Completed : " + (i));
+                System.out.println("Total Bill : " + (cost - total_cost_per_task[i]));//the actual expense of customer will be equal to budget or less than that.
+
+                return taskWithinBudget;
+            }
+            else {
+                taskWithinBudget[i] = task[i];
+                //cost=cost+total_cost_per_task[i];
+
+            }
+
+        }
+
+
+        return taskWithinBudget;
+    }
+}
+
+
+class cost{
+    int CPU_rate=10;
+    int memory_rate=5;
+}
+
+
+class BudgetBasedScheduling extends cost
+{
+    int total_cost=0;
+
+    void CalculateCostOfTask(task_details[] task, int number_of_task)
+    {
+        for(int i=0;i<number_of_task;i++)
+        {
+            task[i].CPU_cost=super.CPU_rate*task[i].CPU_use;
+            task[i].memory_cost=super.memory_rate*task[i].memory_use;
+            total_cost=total_cost+task[i].CPU_cost+task[i].memory_cost;
+        }
+        System.out.println("Total Budget Required for completing all task : "+total_cost);
+    }
+    task_details[] Schedule(task_details[] task, int budget, int number_of_task)
+    {
+        int[] total_cost_per_task = new int[number_of_task];
+        for(int i=0;i<number_of_task;i++)
+        {
+            total_cost_per_task[i]=task[i].CPU_cost+task[i].memory_cost;
+            // System.out.println("Total Cost of Task "+task[i].task_id+" : "+total_cost_per_task[i]);
+
+        }
+        task_details[] taskWithinBudget = new task_details[number_of_task];
+
+        InsertionSort i =new InsertionSort();
+        i.sort(task,total_cost_per_task,number_of_task);
+        taskWithinBudget=i.sortWithinBudget(task,total_cost_per_task,number_of_task,budget);
+        //adding deadline
+
+        return taskWithinBudget;
+
+    }
+
+    task_details[] DeadlineSchedule(task_details[] task,int count,int maximum_deadline)
+    {
+        int ele_count=0;
+        if(maximum_deadline<=0)
+        {
+            System.out.println("NO TASK CAN BE SCHEDULED : ");
+            System.exit(0);
+        }
+        task_details[] taskDeadlineSchedule=new task_details[count];
+
+        for(int i=0;i<count;i++)
+        {
+            int key=task[i].deadline;
+            if(key>count)
+                key=count;//if deadline is greater than number of task(=count) then it is scheduled at last of array
+            for(int j=key-1;j>=0;j--) {
+                if (taskDeadlineSchedule[j] == null) {
+                    taskDeadlineSchedule[j] = task[i];
+                    break;
+                }
+            }
+
+        }
+        for(int i=0;i<count;i++)
+        {
+            if(taskDeadlineSchedule[i]==null)
+            {
+                for(int j=i;j<count-1;j++)
+                {
+                    //maybe some places in array are blank therefore making no empty values
+                    taskDeadlineSchedule[j]=taskDeadlineSchedule[j+1];
+                }
+            }
+            //croping all empty space in taskDeadlineSchedule and sending number of task in taskDeadline Schedule
+            for(int k=0;k<count;k++)
+            {
+                if(taskDeadlineSchedule[k]!=null)
+                {
+                    ele_count=ele_count+1;
+                }
+                else
+                    break;
+            }
+
+        }
+        return taskDeadlineSchedule;
+    }
+    void displayScheduledTask(int budget,int number_of_task,task_details task[])
+    {
+        if(number_of_task<=0)
+        {
+            System.out.println("NO TASK CAN BE SCHEDULED");
+            return;
+        }
+        System.out.println("Budget : "+budget);
+        // System.out.println("Task Scheduled As : ");
+
+
+        System.out.println();
+        for(int i=0;i<number_of_task;i++)
+            System.out.print("-----------------");
+        System.out.println();
+        for(int i=0;i<number_of_task;i++) {
+            System.out.print("|\t\t"+ + task[i].task_id +"("+task[i].deadline+")\t|");
+        }
+        System.out.println();
+        for(int i=0;i<number_of_task;i++)
+            System.out.print("-----------------");
+        System.out.println();
+        //adding timestamp with task;
+
+    }
+}
+
+public class Main
+{
+    public static void main(String[] args) {
+        System.out.println("Enter Budget : ");
+        Scanner s1=new Scanner(System.in);
+        cost c=new cost();
+        int budget=s1.nextInt();
+        System.out.println("Enter Number of Tasks : ");
+        Scanner s=new Scanner(System.in);
+        int number_of_task=s.nextInt();
+
+        task_details task_array[]=new task_details[number_of_task];
+        for(int i=0;i<number_of_task;i++)
+        {
+            task_array[i]=new task_details();
+            // Scanner s = new Scanner(System.in);
+            System.out.println("Enter Task ID for : "+ (i + 1));
+            task_array[i].task_id=s1.nextInt();
+            System.out.println("Enter CPU usage : ");
+            task_array[i].CPU_use=s1.nextInt();
+            System.out.println("Enter Memory Usage : ");
+            task_array[i].memory_use=s1.nextInt();
+            System.out.print("Enter Deadline :");
+            task_array[i].deadline=s1.nextInt();
+        }
+        BudgetBasedScheduling b= new BudgetBasedScheduling();
+        b.CalculateCostOfTask(task_array,number_of_task);
+        System.out.println("***TASK ENTERED BY USER***");
+        b.displayScheduledTask(budget,number_of_task,task_array);
+        task_details[] taskWithinBudget= b.Schedule(task_array,budget,number_of_task);
+        int count=0;
+        for(int j=0;j<number_of_task;j++)
+        {
+            if(taskWithinBudget[j]!=null)
+                count++;
+            else
+                break;
+        }
+
+        b.displayScheduledTask(budget,count,taskWithinBudget);
+        int maximum_deadline=0;
+        for(int i=0;i<number_of_task;i++)
+            maximum_deadline=Math.max(maximum_deadline,task_array[i].deadline);
+
+        task_details[] taskWithDeadline=b.DeadlineSchedule(taskWithinBudget,count,maximum_deadline);
+
+        //many places in taskWithDeadline might be empty, removing those using method in line 201-208
+        System.out.println("***DEADLINE SCHEDULING*** ");
+        b.displayScheduledTask(budget,count,taskWithDeadline);
+    }
+}

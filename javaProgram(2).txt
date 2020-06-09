@@ -1,0 +1,278 @@
+//budget based scheduling
+package sample;
+import javafx.concurrent.Task;
+
+import java.util.Scanner;
+class TaskDetails{
+    String taskID=new String();
+    double CPU_usage;
+    double memory_usage;
+    double costOfTask=0;
+    int deadline;
+
+    TaskDetails(String ID, double CPU,double memory,int deli){
+        taskID=ID;
+        CPU_usage = CPU;
+        memory_usage= memory;
+        deadline=deli;
+    }
+    TaskDetails(double CPU, double memory){
+        CPU_usage=CPU;
+        memory_usage=memory;
+    }
+
+}
+class Rate {
+    double CPU_rate=0;
+    double memory_rate=0;
+
+    Rate() {
+        this.CPU_rate = 0;
+        this.memory_rate = 0;
+    }
+
+    Rate(double x, double y) {
+        CPU_rate = x;
+        memory_rate = y;
+    }
+
+    double getCPU_rate(Rate r){
+        return r.CPU_rate;
+        }
+     double getMemory_rate(Rate r)
+     {
+         return r.memory_rate;
+     }
+
+}
+
+class Schedule_Task_Class
+{
+    double totalCost=0;
+    int totaltaskScheduled=0;
+    TaskDetails[] ScheduledTask(TaskDetails[] taskArray, double budget){
+        TaskDetails[] scheduledTask=new TaskDetails[taskArray.length];
+        for(int i=0;i<taskArray.length;i++)
+        {
+            if(totalCost+taskArray[i].costOfTask<=budget)
+            {
+                scheduledTask[totaltaskScheduled]=taskArray[i];
+                totaltaskScheduled++;
+                totalCost=totalCost+taskArray[i].costOfTask;
+            }
+            else
+                break;
+
+        }
+
+
+        return scheduledTask;
+    }
+
+    TaskDetails[] DeadlineScheduledTask(TaskDetails[] ScheduledTask)
+    {
+        TaskDetails[] DeadlineScheduledTaskArray=new TaskDetails[totaltaskScheduled];
+        System.out.println("Value OF total TASK Scheduled: "+totaltaskScheduled);
+        totaltaskScheduled=0;
+        System.out.println("Value OF total TASK Scheduled: "+totaltaskScheduled);
+
+        int ele_count=0;
+        for(int i=0;i<DeadlineScheduledTaskArray.length;i++) {
+            int key = ScheduledTask[i].deadline;
+            if (key > DeadlineScheduledTaskArray.length)
+                key = DeadlineScheduledTaskArray.length;//if deadline is greater than number of task(=count) then it is scheduled at last of array
+            for (int j = key - 1; j >= 0; j--) {
+                if (DeadlineScheduledTaskArray[j] == null) {
+                    DeadlineScheduledTaskArray[j] = ScheduledTask[i];
+
+                    break;
+                }
+            }
+        }
+        for(int i=0;i<DeadlineScheduledTaskArray.length;i++) {
+            if (DeadlineScheduledTaskArray[i] == null) {
+                for (int j = i; j < DeadlineScheduledTaskArray.length - 1; j++) {
+                    //maybe some places in array are blank therefore making no empty values
+                    DeadlineScheduledTaskArray[j] = DeadlineScheduledTaskArray[j + 1];
+                }
+            }
+        }
+            //croping all empty space in taskDeadlineSchedule and sending number of task in taskDeadline Schedule
+            for(int k=0;k<DeadlineScheduledTaskArray.length;k++)
+            {
+                if(DeadlineScheduledTaskArray[k]!=null)
+                {
+                    ele_count=ele_count+1;
+                }
+                else
+                    break;
+            }
+
+            totaltaskScheduled=ele_count;
+            System.out.println("Value OF total TASK Scheduled: "+totaltaskScheduled);
+
+
+
+
+
+       return DeadlineScheduledTaskArray;
+    }
+
+    TaskDetails[] ArrangeIncreasingOrder(TaskDetails[] taskArray){
+        //using InsertionSort to arrange task in increasing order.
+
+        for(int i=0;i<taskArray.length-1;i++)
+        {
+            if(taskArray[i].costOfTask>taskArray[i+1].costOfTask)
+            {
+                TaskDetails temp;
+                temp=taskArray[i];
+                taskArray[i]=taskArray[i+1];
+                taskArray[i+1]=temp;
+
+            }
+        }
+
+        return taskArray;
+    }
+
+    TaskDetails[] Calculate_Cost_Of_Each_Task(TaskDetails[] taskArray, Rate r){
+
+        for(int i =0;i<taskArray.length;i++)
+        {
+            taskArray[i].costOfTask = (taskArray[i].memory_usage*r.memory_rate)+(taskArray[i].CPU_usage*r.CPU_rate);
+        }
+        return taskArray;
+    }
+    TaskDetails[] Schedule_Task(TaskDetails[] taskArray, Rate r,double budget){
+        int numberOfTask= taskArray.length;
+        TaskDetails[] scheduledTaskArray = new TaskDetails[numberOfTask];
+        taskArray=Calculate_Cost_Of_Each_Task(taskArray,r);
+        taskArray = ArrangeIncreasingOrder(taskArray);
+        scheduledTaskArray=ScheduledTask(taskArray,budget);
+        TaskDetails[] DeadlineScheduledTaskArray=DeadlineScheduledTask(scheduledTaskArray);
+
+
+        return DeadlineScheduledTaskArray;
+    }
+    int Display_TaskList(TaskDetails[] ArrayOfTask, int count) //before Scheduling Task
+    {
+        System.out.println("|Task ID    |Memory Use     |CPU use    |Deadline       ");
+        System.out.println("|-----------|---------------|-----------|--------------|");
+        for(int i=0;i<count;i++)
+        {
+            System.out.println("|"+ArrayOfTask[i].taskID+"       |"+ArrayOfTask[i].memory_usage+"           |"+ArrayOfTask[i].CPU_usage+"           |"+ArrayOfTask[i].deadline);
+
+        }
+        return 1;//successful
+    }
+
+    int Display_ScheduledTask(TaskDetails[] ArrayOfTask, int count)//after Scheduling Task
+    {
+        System.out.println();
+        System.out.print("|   Task ID:    |");
+
+        for(int i=0;i<count;i++)
+              System.out.print("|       "+ArrayOfTask[i].taskID+"      |");
+        System.out.println();
+        for (int i=0;i<count;i++)
+            System.out.print("-----------------");
+        System.out.println();
+        System.out.print("|    Cost       |");
+        for(int i=0; i<count;i++)
+            System.out.print("|       "+ArrayOfTask[i].costOfTask+"   |");
+        System.out.println();
+        System.out.print("-----------------");
+        for(int i=0;i<count;i++)
+            System.out.print("-----------------"+ArrayOfTask[i].deadline);
+
+
+
+
+        return 1; //successful
+    }
+    int Display_totalCost(double budget){
+        System.out.println("Total Cost Of Scheduling Task Is :"+ totalCost);
+        System.out.println("Number of Task in Budget :"+totaltaskScheduled);
+        System.out.println("Budget: "+budget);
+
+        return 1; //operation successful;
+    }
+    int getNumberOfTaskScheduled()
+    {
+        return totaltaskScheduled;
+    }
+
+    double getTotalCost()
+    {
+        return totalCost;
+    }
+
+
+
+
+
+}
+public class Main
+{
+    public static void main(String args[])
+    {   
+        //set Rate.
+        Scanner sc=new Scanner(System.in);
+        System.out.println("Enter CPU Rate");
+        double cpu_rate=sc.nextDouble();
+        System.out.println("Enter Memory Rate");
+        double memory_rate=sc.nextDouble();
+        Rate r= new Rate(cpu_rate,memory_rate);
+
+        //set Task
+
+        System.out.println("Enter Number of Task: ");
+        int task_count=sc.nextInt();
+        TaskDetails taskArray[]=new TaskDetails[task_count];
+        for(int i=0; i<task_count; i++){
+            sc.nextLine();
+            System.out.println("TASK "+ (i+1));
+            System.out.println("Enter Task ID: ");
+            String ID=sc.nextLine();
+            System.out.println("Enter CPU usage: ");
+            double CPU= sc.nextDouble();
+            System.out.println("Enter Memory usage: ");
+            double memory=sc.nextDouble();
+            System.out.println("Enter Deadline: ");
+            int deadline=sc.nextInt();
+            taskArray[i]=new TaskDetails(ID,CPU,memory,deadline);
+
+        }
+
+        //set budget
+        System.out.println("Enter Budget");
+        double budget=sc.nextDouble();
+        
+	/*
+
+        //Rate and Task for testing purpose.
+        Rate r= new Rate(2.13,1.73);
+        int task_count=4;
+        TaskDetails taskArray[]=new TaskDetails[task_count];
+        taskArray[0]=new TaskDetails("RX1",4.2,3.7,8);
+        taskArray[1]=new TaskDetails("RX2",3.1,2,2);
+        taskArray[2]=new TaskDetails("RX3",2.9,7.3,5);
+        taskArray[3]=new TaskDetails("RX4",4,3.5,5);
+        double budget=40;
+	*/
+
+        //calculations
+        Schedule_Task_Class t= new Schedule_Task_Class();
+        t.Display_TaskList(taskArray,task_count);
+
+        TaskDetails[] scheduled = t.Schedule_Task(taskArray,r,budget);
+        t.Display_totalCost(budget);
+        int count= t.getNumberOfTaskScheduled();
+        double totalCost= t.getTotalCost();
+        System.out.println("Task Scheduled: "+count+"   Task Supplies: "+task_count);
+        System.out.println("Total Cost: "+t.getTotalCost()+"   Budget :"+budget);
+        t.Display_ScheduledTask(scheduled,count);//array of scheduled task
+
+    }
+}
